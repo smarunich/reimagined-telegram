@@ -1,8 +1,7 @@
 import pulumi
 import pulumi_aws as aws
+from pulumi_vars import *
 
-config = pulumi.Config()  
-id = config.require('id')
 
 jumpbox_iam_role = aws.iam.Role(id + '_jumpbox_iam_role',
    assume_role_policy="""{

@@ -1,14 +1,7 @@
 import pulumi
 import pulumi_aws as aws
 import ipaddress 
-
-config = pulumi.Config()    
-
-zones = pulumi.Output.from_input(aws.get_availability_zones())
-zone_names = zones.apply(lambda zs: zs.names)
-
-id = config.require('id')
-vpc_cidr = config.require('vpc_cidr')
+from pulumi_vars import *
 
 vpc = aws.ec2.Vpc( id + '_vpc',
     cidr_block=vpc_cidr,
@@ -17,10 +10,13 @@ vpc = aws.ec2.Vpc( id + '_vpc',
     tags={
     'user:Project': pulumi.get_project(),
     'user:Stack': pulumi.get_stack(),
-    'Owner': config.require('owner'),   
+    'Owner': owner, 
+    'Name': id + '_vpc'
     })
 
 list(ipaddress.ip_network(vpc_cidr).subnets(new_prefix=24))[0]
+
+vpc_subnets = []
 
 subnet_infra = aws.ec2.Subnet(id + '_infra_net',
     vpc_id=vpc.id,
@@ -30,8 +26,11 @@ subnet_infra = aws.ec2.Subnet(id + '_infra_net',
     tags={
     'user:Project': pulumi.get_project(),
     'user:Stack': pulumi.get_stack(),
-    'Owner': config.require('owner'),
+    'Owner': owner, 
+    'Name': id + '_infra_net'
     })
+
+vpc_subnets.append(subnet_infra.id)
 
 subnet_app = aws.ec2.Subnet(id + '_app_net',
     vpc_id=vpc.id,
@@ -41,8 +40,12 @@ subnet_app = aws.ec2.Subnet(id + '_app_net',
     tags={
     'user:Project': pulumi.get_project(),
     'user:Stack': pulumi.get_stack(),
-    'Owner': config.require('owner'),
+    'Owner': owner, 
+    'Name': id + '_app_net'
     })
+
+
+vpc_subnets.append(subnet_app.id)
 
 subnet_mgmt = aws.ec2.Subnet(id + '_mgmt_net',
     vpc_id=vpc.id,
@@ -52,18 +55,21 @@ subnet_mgmt = aws.ec2.Subnet(id + '_mgmt_net',
     tags={
     'user:Project': pulumi.get_project(),
     'user:Stack': pulumi.get_stack(),
-    'Owner': config.require('owner'),
+    'Owner': owner, 
+    'Name': id + '_mgmt_net'
     })
 
-vpc_subnets = [ subnet_infra, subnet_app, subnet_mgmt]
+vpc_subnets.append(subnet_mgmt.id)
 
 igw = aws.ec2.InternetGateway(id + '_igw',
     vpc_id=vpc.id,
     tags={
     'user:Project': pulumi.get_project(),
     'user:Stack': pulumi.get_stack(),
-    'Owner': config.require('owner'),
+    'Owner': owner, 
+    'Name': id + '_igw'
     })
+
 
 route_table = aws.ec2.RouteTable(id + '_rt',
     vpc_id=vpc.id,
@@ -74,26 +80,34 @@ route_table = aws.ec2.RouteTable(id + '_rt',
     tags={
     'user:Project': pulumi.get_project(),
     'user:Stack': pulumi.get_stack(),
-    'Owner': config.require('owner'),
+    'Owner': owner, 
+    'Name': id + '_rt'
     })
 
-#ec2.get_subnet_ids(vpc_id=vpc.id)
 # route_table_assoc_item = {}
-# for subnet in vpc_subnets:
-#     route_table_assoc_item.update({ subnet: ec2.RouteTableAssociation(id + subnet.resource_name + '_rt',
-#     subnet_id=subnet.id, 
+# #vpc_subnets = aws.ec2.get_subnet_ids(vpc_id=vpc.id)
+
+#  for subnet_id in vpc_subnets:
+#      route_table_assoc_item.update({subnet_id: aws.ec2.RouteTableAssociation(id + "_" + str(subnet_id) + "_rta",
+#       subnet_id=subnet_id, 
+#       route_table_id=route_table.id)})
+
+# subnet_count = 0
+# for subnet_id in vpc_subnets:
+#     subnet_count += 1
+#     route_table_assoc_item.update({subnet_id: aws.ec2.RouteTableAssociation(id + "_subnet" + str(subnet_count) + "_rta",
+#     subnet_id=subnet_id, 
 #     route_table_id=route_table.id)})
 
-#? subnet_infra.resource_name
-
-subnet_infra = aws.ec2.RouteTableAssociation(id + '_infra_net' + '_rta',
+subnet_infra_rta = aws.ec2.RouteTableAssociation(id + '_infra_net' + '_rta',
      subnet_id=subnet_infra.id, 
      route_table_id=route_table.id)
 
-subnet_app = aws.ec2.RouteTableAssociation(id + '_app_net' + '_rta',
+subnet_app_rta = aws.ec2.RouteTableAssociation(id + '_app_net' + '_rta',
      subnet_id=subnet_app.id, 
      route_table_id=route_table.id)
 
-subnet_mgmt = aws.ec2.RouteTableAssociation(id + '_mgmt_net' + '_rta',
+subnet_mgmt_rta = aws.ec2.RouteTableAssociation(id + '_mgmt_net' + '_rta',
      subnet_id=subnet_mgmt.id, 
      route_table_id=route_table.id)
+

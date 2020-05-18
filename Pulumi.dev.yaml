@@ -1,5 +1,6 @@
 config:
   aws:region: us-west-2
+  reimagined-telegram:ami_ubuntu: ami-0edf3b95e26a682df
   reimagined-telegram:flavour_avi: t2.2xlarge
   reimagined-telegram:flavour_jumpbox: t2.large
   reimagined-telegram:flavour_master: t2.xlarge
