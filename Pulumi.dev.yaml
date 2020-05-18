@@ -1,0 +1,11 @@
+config:
+  aws:region: us-west-2
+  reimagined-telegram:flavour_avi: t2.2xlarge
+  reimagined-telegram:flavour_jumpbox: t2.large
+  reimagined-telegram:flavour_master: t2.xlarge
+  reimagined-telegram:flavour_server: t2.large
+  reimagined-telegram:id: aviKubernetes
+  reimagined-telegram:owner: aviK8S_Training
+  reimagined-telegram:vol_size_avi: "128"
+  reimagined-telegram:vol_size_ubuntu: "60"
+  reimagined-telegram:vpc_cidr: 172.20.0.0/16
