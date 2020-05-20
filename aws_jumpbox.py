@@ -40,11 +40,11 @@ jumpbox = aws.ec2.Instance('jumpbox.pod.lab',
     })
 
 
-# conn = provisioners.ConnectionArgs(
-#     host=jumpbox.public_ip,
-#     username='ubuntu',
-#     private_key=key.private_key_pem
-# )
+conn = provisioners.ConnectionArgs(
+     host=jumpbox.public_ip,
+     username='ubuntu',
+     private_key=key.private_key_pem
+)
 
 # ansible_runner.run_async(playbook="provisioning/provision_jumpbox.yml", 
 #                           ssh_key="aviKubernetes_pkey.pem",

@@ -13,10 +13,12 @@ key = tls.PrivateKey(id + '_pkey',
 
 pulumi.export('public_key', key.public_key_openssh)
 pulumi.export('private_key', key.private_key_pem)
+pulumi.Output.all([key.private_key_pem]).apply(lambda key: f'key')
+key.private_key_pem.apply(lambda key: f'key')
 
-# private_key_pem = open(id + '_pkey.pem', 'w')
-# private_key_pem.write(key.private_key_pem.apply(lambda key: f'{key}''))
-# private_key_pem.close()
+#private_key_pem_file = open(id + '_pkey.pem', 'w')
+#private_key_pem_file.write(pulumi.Output.all([key.private_key_pem]).apply(lambda key: f'key'))
+#private_key_pem_file.close()
 
 keypair = aws.ec2.KeyPair(id + '_keypair', public_key=key.public_key_openssh)
 
